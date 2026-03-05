@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>飲品點購系統 - 專業版</title>
+    <title>飲品點購系統 - 手機極速版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --primary: #6c5ce7; --bg: #f4f7f6; --success: #00b894; --accent: #fdcb6e; --edit: #0984e3; --danger: #d63031; }
         * { box-sizing: border-box; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 10px; margin: 0; color: #2d3436; overflow-x: hidden; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 8px; margin: 0; color: #2d3436; overflow-x: hidden; }
 
-        .container { max-width: 1000px; margin: auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
-        .header h2 { color: var(--primary); margin: 5px 0; font-size: 1.4em; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 15px; padding-bottom: 8px; }
+        .header h2 { color: var(--primary); margin: 5px 0; font-size: 1.3em; }
 
         /* 聯繫資訊 */
-        .contact-info { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #fff9eb; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); }
+        .contact-info { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; background: #fff9eb; padding: 12px; border-radius: 8px; border: 1px solid var(--accent); }
 
         /* 訂單表單 */
-        .order-form { display: flex; flex-direction: column; gap: 12px; background: #fff; padding: 15px; border: 1px solid #dfe6e9; border-radius: 10px; }
+        .order-form { display: flex; flex-direction: column; gap: 10px; background: #fff; padding: 12px; border: 1px solid #dfe6e9; border-radius: 10px; }
         
         /* 電腦版併排邏輯 */
         @media (min-width: 768px) {
@@ -29,47 +29,50 @@
         }
 
         .field { display: flex; flex-direction: column; width: 100%; }
-        label { font-size: 0.85em; font-weight: bold; color: #636e72; margin-bottom: 4px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 16px; outline: none; }
+        label { font-size: 0.8em; font-weight: bold; color: #636e72; margin-bottom: 3px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 15px; outline: none; background: white; }
 
-        /* 糖冰併排小區塊 */
-        .row-group { display: flex; gap: 8px; width: 100%; }
-        .row-group > .field { flex: 1; }
+        /* 三欄併排關鍵樣式 */
+        .triple-row { display: flex; gap: 5px; width: 100%; }
+        .triple-row > .field { flex: 1; min-width: 0; } /* min-width: 0 防止內容撐開 */
+        
+        /* 雙欄併排樣式 (單價/數量) */
+        .double-row { display: flex; gap: 8px; width: 100%; }
+        .double-row > .field { flex: 1; }
 
         /* 統計表區域 */
-        .stats-area { margin-top: 25px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
+        .stats-area { margin-top: 20px; background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; }
         .stats-header-info { display: none; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; border-radius: 5px; }
 
-        table { width: 100%; border-collapse: collapse; min-width: 750px; }
-        th { background: var(--primary); color: white; padding: 12px 5px; font-size: 13px; white-space: nowrap; }
-        td { border: 1px solid #eee; padding: 10px 5px; text-align: center; font-size: 13px; }
-        .total-row { background: #f8f9fa; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { background: var(--primary); color: white; padding: 10px 4px; font-size: 13px; white-space: nowrap; }
+        td { border: 1px solid #eee; padding: 8px 4px; text-align: center; font-size: 13px; }
         
         .btn-add { background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 5px; }
         .btn-export { background: var(--edit); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: bold; width: 100%; font-size: 16px; }
-        .btn-clear-all { background: #fab1a0; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; float: right; }
+        .btn-clear-all { background: #fab1a0; color: var(--danger); border: 1px solid var(--danger); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; float: right; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>🥤 飲品點購系統</h2>
-        <p>手機點餐統計工具 (糖冰分離版)</p>
+        <h2>🥤 飲品訂購系統</h2>
+        <p>三欄併排行動優化版</p>
     </div>
 
     <div class="contact-info">
         <div class="field"><label>聯繫人</label><input type="text" id="contactName" placeholder="主揪姓名"></div>
         <div class="field"><label>電話</label><input type="tel" id="contactTel" placeholder="09xx-xxx-xxx"></div>
-        <div class="field"><label>送餐地址/時間</label><input type="text" id="contactAddr" placeholder="地點或備註"></div>
+        <div class="field"><label>送餐地點</label><input type="text" id="contactAddr" placeholder="地點或備註"></div>
     </div>
 
     <div class="order-form">
-        <div class="field"><label>訂購人</label><input type="text" id="uName" placeholder="同事姓名"></div>
+        <div class="field"><label>訂購人</label><input type="text" id="uName" placeholder="姓名"></div>
         <div class="field"><label>飲品名稱</label><input type="text" id="dName" placeholder="珍珠奶茶等"></div>
         
-        <div class="row-group">
+        <div class="triple-row">
             <div class="field">
                 <label>規格</label>
                 <select id="dSize"><option>大杯</option><option>中杯</option><option>瓶裝</option></select>
@@ -80,29 +83,22 @@
                     <option>無糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>正常</option>
                 </select>
             </div>
-        </div>
-
-        <div class="row-group">
             <div class="field">
                 <label>冰塊</label>
                 <select id="ice">
                     <option>去冰</option><option>微冰</option><option>半冰</option><option>少冰</option><option>正常</option><option>熱飲</option>
                 </select>
             </div>
-            <div class="field">
-                <label>單價</label>
-                <input type="number" id="price" value="0">
-            </div>
         </div>
 
-        <div class="field field-full">
-            <label>數量</label>
-            <input type="number" id="qty" value="1">
+        <div class="double-row">
+            <div class="field"><label>單價</label><input type="number" id="price" value="0"></div>
+            <div class="field"><label>數量</label><input type="number" id="qty" value="1"></div>
         </div>
 
         <div class="field field-full">
             <label>備註</label>
-            <input type="text" id="note" placeholder="例如：加珍珠、不加冰">
+            <input type="text" id="note" placeholder="加料等資訊">
         </div>
         
         <button class="btn-add" id="btnAddOrder" onclick="addOrder()">➕ 加入統計清單</button>
@@ -116,7 +112,7 @@
 
         <div style="margin-bottom: 10px;">
             <h3 style="display: inline-block; margin: 0; font-size: 1.1em;">📊 統計表</h3>
-            <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ 清空資料</button>
+            <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ 清空</button>
         </div>
 
         <div class="table-responsive">
@@ -128,8 +124,8 @@
                 </thead>
                 <tbody></tbody>
                 <tfoot>
-                    <tr class="total-row">
-                        <td colspan="6" style="text-align: right;">總金額：</td>
+                    <tr style="background:#f8f9fa; font-weight:bold;">
+                        <td colspan="6" style="text-align: right;">總計：</td>
                         <td id="totalQty">0</td>
                         <td id="grandTotal" style="color:var(--danger);">0</td>
                         <td class="no-export">元</td>
@@ -139,7 +135,7 @@
         </div>
     </div>
 
-    <button class="btn-export" onclick="saveImg()">📸 匯出統計圖片 (傳給 Line)</button>
+    <button class="btn-export" onclick="saveImg()">📸 匯出統計圖片</button>
 </div>
 
 <script>
@@ -151,8 +147,7 @@
         if(!uName || !dName) return alert("請輸入姓名與飲品！");
 
         const data = {
-            uName: uName,
-            dName: dName,
+            uName: uName, dName: dName,
             size: document.getElementById('dSize').value,
             sugar: document.getElementById('sugar').value,
             ice: document.getElementById('ice').value,
@@ -198,7 +193,7 @@
         document.getElementById('qty').value = cells[6].innerText;
         document.getElementById('btnAddOrder').innerText = "💾 儲存修改";
         document.getElementById('btnAddOrder').style.background = "var(--edit)";
-        window.scrollTo({ top: 150, behavior: 'smooth' });
+        window.scrollTo({ top: 100, behavior: 'smooth' });
     }
 
     function clearForm() {
@@ -221,19 +216,16 @@
     }
 
     function clearAllOrders() {
-        if(confirm("確定要清空整份清單嗎？")) { 
-            document.querySelector('#mainTable tbody').innerHTML = ""; 
-            updateTotal(); 
-        }
+        if(confirm("確定清空嗎？")) { document.querySelector('#mainTable tbody').innerHTML = ""; updateTotal(); }
     }
 
     function saveImg() {
         const rows = document.querySelectorAll('#mainTable tbody tr');
-        if(rows.length === 0) return alert("目前沒有資料可以匯出喔！");
+        if(rows.length === 0) return alert("目前沒有資料！");
 
         document.getElementById('outContact').innerText = "聯繫人：" + (document.getElementById('contactName').value || "-");
         document.getElementById('outTel').innerText = "電話：" + (document.getElementById('contactTel').value || "-");
-        document.getElementById('outAddr').innerText = "備註：" + (document.getElementById('contactAddr').value || "-");
+        document.getElementById('outAddr').innerText = "地址：" + (document.getElementById('contactAddr').value || "-");
         
         const info = document.getElementById('statsHeaderInfo');
         const noExport = document.querySelectorAll('.no-export');
@@ -243,7 +235,7 @@
 
         html2canvas(document.querySelector("#captureArea"), { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `飲料清單_${new Date().getTime()}.png`;
+            link.download = `訂單統計_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL();
             link.click();
             info.style.display = "none";

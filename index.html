@@ -3,223 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>辦公室飲品點購系統 - 終極穩定版</title>
+    <title>辦公室飲品點購系統</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --primary: #6c5ce7; --bg: #f4f7f6; --success: #00b894; --accent: #fdcb6e; --edit: #0984e3; --danger: #d63031; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 10px; color: #2d3436; line-height: 1.6; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         
         /* 標題區 */
-        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
-        .header h2 { display: inline-block; margin: 0; }
-
-        /* 本地預覽區 (Base64) */
-        .upload-section { background: #ebf5ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px dashed #0984e3; text-align: center; }
-        .btn-select-file { background: #0984e3; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        /* 圖片預覽 */
-        .menu-preview-container { text-align: center; margin-bottom: 20px; background: #fff; border-radius: 10px; padding: 10px; display: none; border: 1px solid #ddd; position: relative; }
-        #menuPreview { max-width: 100%; max-height: 500px; border-radius: 5px; cursor: zoom-in; }
-        .preview-tip { font-size: 12px; color: #666; margin-top: 5px; }
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 25px; padding-bottom: 15px; }
+        .header h2 { color: var(--primary); margin: 0; }
+        .header p { font-size: 0.9em; color: #636e72; margin-top: 5px; }
 
         /* 聯繫資訊 */
-        .contact-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; background: #fff9eb; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); }
+        .contact-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; background: #fff9eb; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); }
         
         /* 訂單表單 */
-        .order-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
+        .order-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; background: #fff; padding: 20px; border: 1px solid #dfe6e9; border-radius: 10px; position: relative; }
         .field { display: flex; flex-direction: column; }
         label { font-size: 0.85em; font-weight: bold; color: #636e72; margin-bottom: 5px; }
-        input, select { padding: 8px 12px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 14px; height: 42px; }
+        input, select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 14px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(108, 92, 231, 0.2); }
 
-        /* 統計表 */
-        .stats-area { margin-top: 30px; background: white; padding: 10px; border-radius: 8px; }
+        /* 按鈕樣式 */
+        .btn-add { grid-column: 1 / -1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; transition: 0.3s; }
+        .btn-add:hover { background: #00a383; transform: translateY(-1px); }
+        .btn-export { background: var(--edit); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin-top: 25px; font-weight: bold; width: 100%; font-size: 16px; }
+        .btn-clear-all { background: #fab1a0; color: var(--danger); border: 1px solid var(--danger); padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; float: right; }
+
+        /* 統計表區域 */
+        .stats-area { margin-top: 30px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
         .stats-header-info { display: none; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; margin-top: 10px; }
-        th { background: var(--primary); color: white; padding: 10px; }
-        td { border: 1px solid #eee; padding: 8px; text-align: center; }
-        .total-row { background: #dfe6e9; font-weight: bold; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; margin-top: 10px; }
+        th { background: var(--primary); color: white; padding: 12px 8px; font-size: 14px; }
+        td { border: 1px solid #eee; padding: 10px 8px; text-align: center; font-size: 14px; }
+        .total-row { background: #f8f9fa; font-weight: bold; font-size: 16px; }
         
-        .btn-add { grid-column: 1 / -1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        .btn-export { background: #0984e3; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; margin-top: 20px; font-weight: bold; width: 100%; }
-        .btn-clear-all { background: #fab1a0; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; float: right; }
+        .op-btn { cursor: pointer; padding: 2px 5px; border-radius: 3px; font-size: 12px; text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>辦公室飲品點購系統<span style="font-size: 0.5em; color: #888; margin-left: 10px;">(免連網圖片版)</span></h2>
-    </div>
-
-    <div class="upload-section">
-        <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #0984e3;">🖼️ 載入菜單圖片</label>
-        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(this)">
-        <button class="btn-select-file" onclick="document.getElementById('fileInput').click()">📁 從電腦/手機選取菜單</button>
-        <p class="preview-tip">提示：選取後圖片會直接嵌入網頁，不需擔心外連失效。</p>
-    </div>
-
-    <div class="menu-preview-container" id="previewBox">
-        <div style="text-align: right;"><small onclick="closePreview()" style="cursor:pointer; color:red;">[關閉預覽]</small></div>
-        <img id="menuPreview" src="" alt="菜單預覽">
+        <h2>🥤 辦公室飲品點購系統</h2>
+        <p>填寫下方資訊，自動生成統計清單圖片</p>
     </div>
 
     <div class="contact-info">
-        <div class="field"><label>聯繫人</label><input type="text" id="contactName" placeholder="王小明"></div>
-        <div class="field"><label>電話</label><input type="tel" id="contactTel" placeholder="0912-345-678"></div>
-        <div class="field" style="grid-column: span 2;"><label>地址</label><input type="text" id="contactAddr" placeholder="送餐地址..."></div>
+        <div class="field"><label>聯繫人 (主揪)</label><input type="text" id="contactName" placeholder="王小明"></div>
+        <div class="field"><label>聯繫電話</label><input type="tel" id="contactTel" placeholder="0912-345-678"></div>
+        <div class="field" style="grid-column: span 2;"><label>送餐地址/備註</label><input type="text" id="contactAddr" placeholder="某某大樓 5 樓 A 會議室"></div>
     </div>
 
     <div class="order-form">
-        <div class="field"><label>訂購人</label><input type="text" id="uName"></div>
-        <div class="field"><label>飲品名稱</label><input type="text" id="dName"></div>
-        <div class="field"><label>糖度</label><select id="sugar"><option>無糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>全糖</option></select></div>
-        <div class="field"><label>冰塊</label><select id="ice"><option>去冰</option><option>微冰</option><option>半冰</option><option>少冰</option><option>正常</option></select></div>
+        <div class="field"><label>訂購人</label><input type="text" id="uName" placeholder="姓名"></div>
+        <div class="field"><label>飲品名稱</label><input type="text" id="dName" placeholder="例如：珍珠奶茶"></div>
+        <div class="field">
+            <label>規格</label>
+            <select id="dSize">
+                <option value="大杯">大杯 (L)</option>
+                <option value="中杯">中杯 (M)</option>
+                <option value="瓶裝">瓶裝</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>糖度</label>
+            <select id="sugar">
+                <option>無糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>正常糖</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>冰塊</label>
+            <select id="ice">
+                <option>去冰</option><option>微冰</option><option>半冰</option><option>少冰</option><option>正常冰</option><option>熱飲</option>
+            </select>
+        </div>
         <div class="field"><label>單價 ($)</label><input type="number" id="price" value="0"></div>
         <div class="field"><label>數量</label><input type="number" id="qty" value="1"></div>
-        <div class="field" style="grid-column: 1 / -1;"><label>備註</label><input type="text" id="note" placeholder="例如：加珍珠+10元"></div>
+        <div class="field" style="grid-column: 1 / -1;"><label>其他備註</label><input type="text" id="note" placeholder="例如：加珍珠+10元、不加咖啡凍"></div>
+        
         <button class="btn-add" id="btnAddOrder" onclick="addOrder()">➕ 加入統計清單</button>
     </div>
 
     <div id="captureArea" class="stats-area">
         <div id="statsHeaderInfo" class="stats-header-info">
-            <h2 style="color:var(--primary);">🥤 飲品訂購清單</h2>
-            <p id="outContact"></p><p id="outTel"></p><p id="outAddr"></p>
+            <h2 style="color:var(--primary); margin-bottom: 5px;">📋 飲品訂購清單</h2>
+            <p id="outContact" style="margin:2px 0;"></p>
+            <p id="outTel" style="margin:2px 0;"></p>
+            <p id="outAddr" style="margin:2px 0;"></p>
         </div>
+
         <div style="overflow: hidden; margin-bottom: 10px;">
-            <h3 style="display: inline-block; margin: 0;">📊 訂單統計表</h3>
-            <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ 清空統計表</button>
+            <h3 style="display: inline-block; margin: 0; color: #2d3436;">📊 當前訂單統計</h3>
+            <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ 全部清空</button>
         </div>
-        <table id="mainTable">
-            <thead>
-                <tr><th>姓名</th><th>飲品</th><th>糖冰</th><th>單價</th><th>數量</th><th>總計</th><th>備註</th><th>操作</th></tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td colspan="5" style="text-align: right;">應付總金額：</td>
-                    <td id="grandTotal" style="color:#d63031;">0</td>
-                    <td colspan="2">元</td>
-                </tr>
-            </tfoot>
-        </table>
+
+        <div class="table-responsive">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th>訂購人</th>
+                        <th>飲品名稱</th>
+                        <th>規格</th>
+                        <th>糖度/冰塊</th>
+                        <th>單價</th>
+                        <th>數量</th>
+                        <th>小計</th>
+                        <th>備註</th>
+                        <th class="no-export">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="5" style="text-align: right;">總計項目：<span id="itemCount">0</span> 筆</td>
+                        <td id="totalQty">0</td>
+                        <td id="grandTotal" style="color:var(--danger);">0</td>
+                        <td colspan="2">元</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
 
-    <button class="btn-export" onclick="saveImg()">📸 匯出統計表圖片 (傳給老闆)</button>
+    <button class="btn-export" onclick="saveImg()">📸 匯出統計清單圖片 (傳給 Line 群組)</button>
 </div>
 
 <script>
-    // --- 核心：Base64 本地轉換邏輯 ---
-    function handleFileSelect(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('menuPreview');
-                const box = document.getElementById('previewBox');
-                img.src = e.target.result; // 這就是 Base64 代碼
-                box.style.display = 'block';
-                // 保存到 localStorage，重新整理也不會不見
-                localStorage.setItem('savedMenu', e.target.result);
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function closePreview() { document.getElementById('previewBox').style.display = 'none'; }
-
-    // 頁面載入時檢查有沒有存過的菜單
-    window.onload = function() {
-        const saved = localStorage.getItem('savedMenu');
-        if(saved) {
-            document.getElementById('menuPreview').src = saved;
-            document.getElementById('previewBox').style.display = 'block';
-        }
-    };
-
-    // --- 點餐逻辑 ---
     let editingRow = null;
 
+    // --- 新增或修改訂單 ---
     function addOrder() {
+        const uName = document.getElementById('uName').value.trim();
+        const dName = document.getElementById('dName').value.trim();
+        
+        if(!uName || !dName) {
+            alert("請填寫訂購人與飲品名稱喔！");
+            return;
+        }
+
         const data = {
-            uName: document.getElementById('uName').value || "同事",
-            dName: document.getElementById('dName').value || "飲品",
+            uName: uName,
+            dName: dName,
+            size: document.getElementById('dSize').value,
             sugarIce: `${document.getElementById('sugar').value}/${document.getElementById('ice').value}`,
             price: parseInt(document.getElementById('price').value) || 0,
             qty: parseInt(document.getElementById('qty').value) || 1,
-            note: document.getElementById('note').value || "-",
+            note: document.getElementById('note').value || "-"
         };
+
         const total = data.price * data.qty;
         const tbody = document.querySelector('#mainTable tbody');
 
         if (editingRow) {
+            // 更新現有列
             renderRow(editingRow, data, total);
             editingRow = null;
             document.getElementById('btnAddOrder').innerText = "➕ 加入統計清單";
             document.getElementById('btnAddOrder').style.background = "var(--success)";
         } else {
+            // 新增一列
             renderRow(tbody.insertRow(), data, total);
         }
-        updateTotal(); clearForm();
+
+        updateTotal();
+        clearForm();
     }
 
+    // --- 繪製表格列 ---
     function renderRow(row, data, total) {
         row.innerHTML = `
-            <td>${data.uName}</td><td>${data.dName}</td><td>${data.sugarIce}</td>
-            <td>${data.price}</td><td>${data.qty}</td><td><b>${total}</b></td><td>${data.note}</td>
-            <td>
-                <span onclick="editRow(this.parentElement.parentElement)" style="cursor:pointer;color:blue;">修改</span> | 
-                <span onclick="this.parentElement.parentElement.remove(); updateTotal();" style="cursor:pointer;color:red;">❌</span>
+            <td>${data.uName}</td>
+            <td>${data.dName}</td>
+            <td>${data.size}</td>
+            <td>${data.sugarIce}</td>
+            <td>${data.price}</td>
+            <td>${data.qty}</td>
+            <td><b>${total}</b></td>
+            <td>${data.note}</td>
+            <td class="no-export">
+                <span onclick="editRow(this.parentElement.parentElement)" style="color:var(--edit); cursor:pointer;">修改</span> | 
+                <span onclick="deleteRow(this.parentElement.parentElement)" style="color:var(--danger); cursor:pointer;">❌</span>
             </td>
         `;
     }
 
+    // --- 修改功能 ---
     function editRow(row) {
         editingRow = row;
         const cells = row.cells;
+        
         document.getElementById('uName').value = cells[0].innerText;
         document.getElementById('dName').value = cells[1].innerText;
-        document.getElementById('price').value = cells[3].innerText;
-        document.getElementById('qty').value = cells[4].innerText;
-        document.getElementById('note').value = cells[6].innerText;
-        document.getElementById('btnAddOrder').innerText = "💾 儲存修改";
+        document.getElementById('dSize').value = cells[2].innerText;
+        // 糖冰需要手動選擇，或保持原樣
+        document.getElementById('price').value = cells[4].innerText;
+        document.getElementById('qty').value = cells[5].innerText;
+        document.getElementById('note').value = cells[7].innerText;
+
+        document.getElementById('btnAddOrder').innerText = "💾 儲存修改內容";
         document.getElementById('btnAddOrder').style.background = "var(--edit)";
+        window.scrollTo({ top: 200, behavior: 'smooth' });
     }
 
+    function deleteRow(row) {
+        if(confirm("確定要刪除這筆訂單嗎？")) {
+            row.remove();
+            updateTotal();
+        }
+    }
+
+    // --- 清空表單 ---
     function clearForm() {
-        document.getElementById('uName').value = ""; document.getElementById('dName').value = "";
-        document.getElementById('note').value = ""; document.getElementById('price').value = 0;
+        document.getElementById('uName').value = "";
+        document.getElementById('dName').value = "";
+        document.getElementById('price').value = 0;
+        document.getElementById('qty').value = 1;
+        document.getElementById('note').value = "";
     }
 
+    // --- 更新總計 ---
     function updateTotal() {
-        let sum = 0;
-        document.querySelectorAll('#mainTable tbody tr').forEach(tr => sum += parseInt(tr.cells[5].innerText));
-        document.getElementById('grandTotal').innerText = sum;
+        let totalMoney = 0;
+        let totalQty = 0;
+        const rows = document.querySelectorAll('#mainTable tbody tr');
+        
+        rows.forEach(tr => {
+            totalQty += parseInt(tr.cells[5].innerText);
+            totalMoney += parseInt(tr.cells[6].innerText);
+        });
+
+        document.getElementById('itemCount').innerText = rows.length;
+        document.getElementById('totalQty').innerText = totalQty;
+        document.getElementById('grandTotal').innerText = totalMoney;
     }
 
+    // --- 清空全部 ---
     function clearAllOrders() {
-        if(confirm("確定要清空統計表嗎？")) { document.querySelector('#mainTable tbody').innerHTML = ""; updateTotal(); }
+        if(confirm("確定要清空整份統計表嗎？資料無法找回喔！")) {
+            document.querySelector('#mainTable tbody').innerHTML = "";
+            updateTotal();
+        }
     }
 
+    // --- 匯出圖片邏輯 ---
     function saveImg() {
-        document.getElementById('outContact').innerText = "聯繫人：" + document.getElementById('contactName').value;
-        document.getElementById('outTel').innerText = "電話：" + document.getElementById('contactTel').value;
-        document.getElementById('outAddr').innerText = "地址：" + document.getElementById('contactAddr').value;
-        
-        const info = document.getElementById('statsHeaderInfo');
-        const actionCols = document.querySelectorAll('th:last-child, td:last-child');
-        
-        info.style.display = "block";
-        actionCols.forEach(el => el.style.display = "none");
+        const rows = document.querySelectorAll('#mainTable tbody tr');
+        if(rows.length === 0) {
+            alert("目前沒有訂單可以匯出喔！");
+            return;
+        }
 
-        html2canvas(document.querySelector("#captureArea"), { scale: 2 }).then(canvas => {
+        // 填入抬頭資訊
+        document.getElementById('outContact').innerText = "聯繫人：" + (document.getElementById('contactName').value || "未填寫");
+        document.getElementById('outTel').innerText = "電話：" + (document.getElementById('contactTel').value || "未填寫");
+        document.getElementById('outAddr').innerText = "地址/備註：" + (document.getElementById('contactAddr').value || "未填寫");
+        
+        const infoHeader = document.getElementById('statsHeaderInfo');
+        const noExportItems = document.querySelectorAll('.no-export');
+        
+        // 隱藏操作欄位與顯示報表抬頭
+        infoHeader.style.display = "block";
+        noExportItems.forEach(el => el.style.display = "none");
+
+        html2canvas(document.querySelector("#captureArea"), { 
+            scale: 2,
+            backgroundColor: "#ffffff"
+        }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `飲料訂單統計_${new Date().getTime()}.png`;
-            link.href = canvas.toDataURL();
+            link.download = `飲料訂單統計_${new Date().toLocaleDateString()}.png`;
+            link.href = canvas.toDataURL("image/png");
             link.click();
-            info.style.display = "none";
-            actionCols.forEach(el => el.style.display = "");
+
+            // 還原介面
+            infoHeader.style.display = "none";
+            noExportItems.forEach(el => el.style.display = "");
         });
     }
 </script>
+
 </body>
 </html>

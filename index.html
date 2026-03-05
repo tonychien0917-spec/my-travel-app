@@ -3,152 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 飲品點購系統 - 規範選項版</title>
+    <title>辦公室飲品點購系統 - 完整功能版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
-      }
-    </script>
     <style>
-        :root { --primary: #6c5ce7; --bg: #f4f7f6; --success: #00b894; --accent: #fdcb6e; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 20px; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 25px; padding-bottom: 10px; }
-        .card { background: #f8f9ff; border: 2px dashed var(--primary); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 25px; }
+        :root { --primary: #6c5ce7; --bg: #f4f7f6; --success: #00b894; --accent: #fdcb6e; --edit: #0984e3; --danger: #d63031; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 10px; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         
-        .order-form { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; background: #fff; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        /* 標題區 */
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+        .header h2 { display: inline-block; margin: 0; }
+        .header .subtitle { font-size: 0.5em; vertical-align: middle; margin-left: 10px; color: #636e72; font-weight: normal; }
+
+        /* 功能控制區 (上傳與清空) */
+        .control-panel { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .btn-control { padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .btn-upload { background: #a29bfe; color: white; }
+        .btn-clear { background: #fab1a0; color: var(--danger); }
+        .btn-clear:hover { background: var(--danger); color: white; }
+
+        /* 圖片預覽區 */
+        .menu-preview-container { text-align: center; margin-bottom: 20px; background: #f9f9f9; border-radius: 10px; padding: 10px; display: none; border: 1px dashed #ccc; }
+        #menuPreview { max-width: 100%; max-height: 400px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+        /* 聯繫資訊欄位 */
+        .contact-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; background: #fff9eb; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); }
+        .contact-info .field.address { grid-column: span 1; }
+        @media (min-width: 768px) { .contact-info .field.address { grid-column: span 2; } }
+
+        /* 訂單表單 */
+        .order-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
         .field { display: flex; flex-direction: column; }
         label { font-size: 0.85em; font-weight: bold; color: #636e72; margin-bottom: 5px; }
-        input, select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 14px; height: 42px; box-sizing: border-box; }
-        
+        input, select { padding: 8px 12px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 14px; height: 42px; box-sizing: border-box; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 5px rgba(108, 92, 231, 0.2); }
+
+        /* 自行輸入隱藏框 */
         .custom-input { display: none; margin-top: 5px; border: 2px solid var(--primary); background: #f0f0ff; }
         .btn-reset { font-size: 11px; color: var(--primary); cursor: pointer; margin-top: 3px; display: none; text-align: right; }
 
-        .price-auto-hint { grid-column: span 5; background: var(--accent); padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.2em; margin: 10px 0; border: 1px solid #e1b12c; }
-        .btn-add { grid-column: span 5; background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        /* 金額預覽與按鈕 */
+        .price-auto-hint { grid-column: 1 / -1; background: var(--accent); padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.1em; margin: 5px 0; border: 1px solid #e1b12c; }
+        .btn-add { grid-column: 1 / -1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-add:hover { background: #019477; transform: translateY(-2px); }
 
-        .stats-area { margin-top: 40px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 950px; }
-        th { background: var(--primary); color: white; padding: 12px; font-size: 14px; }
-        td { border: 1px solid #eee; padding: 10px; text-align: center; font-size: 14px; }
-        .total-row { background: #dfe6e9; font-weight: bold; font-size: 1.1em; }
-        .loader { display: none; color: var(--primary); font-weight: bold; margin: 10px 0; }
+        /* 統計表區域 */
+        .stats-area { margin-top: 30px; background: white; padding: 10px; border-radius: 8px; }
+        .stats-header-info { display: none; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+        .stats-header-info p { margin: 5px 0; font-weight: bold; }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; margin-top: 10px; }
+        th { background: var(--primary); color: white; padding: 10px; font-size: 14px; white-space: nowrap; }
+        td { border: 1px solid #eee; padding: 8px; text-align: center; font-size: 14px; }
+        .total-row { background: #dfe6e9; font-weight: bold; }
+        
+        /* 操作按鈕樣式 */
+        .btn-del { color: var(--danger); cursor: pointer; border: none; background: none; font-size: 1.2em; }
+        .btn-edit { color: var(--edit); cursor: pointer; border: none; background: none; font-size: 1em; font-weight: bold; margin-right: 5px; }
+        .btn-export { background: #0984e3; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; margin-top: 20px; font-weight: bold; width: 100%; }
+        @media (min-width: 768px) { .btn-export { width: auto; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>🥤 智慧飲品點購系統 (規範選項版)</h2>
-        <p>固定模型：models/gemini-2.5-flash</p>
+        <h2>辦公室飲品點購系統<span class="subtitle">優化版 (支援圖片菜單與快速清空)</span></h2>
     </div>
 
-    <div class="card">
-        <input type="file" id="menuImg" accept="image/*">
-        <button onclick="analyzeMenu()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight: bold;">🚀 解析菜單價格</button>
-        <div id="loader" class="loader">🪄 正在解析菜單...</div>
+    <div class="control-panel">
+        <button class="btn-control btn-upload" onclick="document.getElementById('fileInput').click()">📸 上傳菜單圖片</button>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewMenu(this)">
+        
+        <button class="btn-control btn-clear" onclick="clearAllOrders()">🗑️ 清空統計清單</button>
+    </div>
+
+    <div class="menu-preview-container" id="previewBox">
+        <div style="text-align: right;"><small style="cursor:pointer; color: #999;" onclick="closePreview()">❌ 隱藏預覽</small></div>
+        <img id="menuPreview" src="" alt="菜單預覽">
+    </div>
+
+    <div class="contact-info">
+        <div class="field"><label>聯繫人</label><input type="text" id="contactName" placeholder="例如：王小明"></div>
+        <div class="field"><label>聯繫電話</label><input type="tel" id="contactTel" placeholder="例如：0912-345-678"></div>
+        <div class="field address"><label>送餐地址</label><input type="text" id="contactAddr" placeholder="例如：台北市信義區忠孝東路五段xxx號x樓"></div>
     </div>
 
     <div class="order-form">
         <div class="field"><label>訂購人</label><input type="text" id="uName" placeholder="姓名"></div>
-        
+        <div class="field"><label>飲品名稱</label><input type="text" id="dName" placeholder="例如：珍珠奶茶"></div>
         <div class="field">
-            <label>飲品名稱</label>
-            <select id="dName" onchange="toggleInput(this, 'customDName')">
-                <option value="">請解析或輸入</option>
-                <option value="CUSTOM">➕ 自行輸入...</option>
-            </select>
-            <input type="text" id="customDName" class="custom-input" placeholder="手動輸入名稱">
-            <span class="btn-reset" id="reset_dName" onclick="resetToSelect('dName', 'customDName')">↩ 返回選單</span>
-        </div>
-
-        <div class="field">
-            <label>大小/規格</label>
+            <label>規格</label>
             <select id="dSize" onchange="toggleInput(this, 'customDSize')">
                 <option value="大杯">大杯</option>
                 <option value="中杯">中杯</option>
                 <option value="CUSTOM">➕ 自行輸入...</option>
             </select>
-            <input type="text" id="customDSize" class="custom-input" placeholder="如：分享瓶">
-            <span class="btn-reset" id="reset_dSize" onclick="resetToSelect('dSize', 'customDSize')">↩ 返回選單</span>
+            <input type="text" id="customDSize" class="custom-input" placeholder="手動規格">
+            <span class="btn-reset" id="reset_dSize" onclick="resetToSelect('dSize', 'customDSize')">↩ 返回</span>
         </div>
-
         <div class="field"><label>冷/熱</label><select id="dTemp"><option>冰</option><option>熱</option></select></div>
+        <div class="field"><label>糖度</label><select id="sugar"><option>無糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>全糖</option></select></div>
+        <div class="field"><label>冰塊</label><select id="ice"><option>去冰</option><option>微冰</option><option>半冰</option><option>少冰</option><option>正常冰</option></select></div>
         
-        <div class="field">
-            <label>糖度</label>
-            <select id="sugar">
-                <option>無糖</option>
-                <option>微糖</option>
-                <option>半糖</option>
-                <option>少糖</option>
-                <option>全糖</option>
-            </select>
-        </div>
+        <div class="field"><label>配料名稱</label><input type="text" id="toppingName" placeholder="無、珍珠、椰果"></div>
+        <div class="field"><label>配料金額 ($)</label><input type="number" id="toppingPrice" value="0" min="0" oninput="calculateRowTotal()"></div>
+        <div class="field"><label>單價 ($)</label><input type="number" id="price" value="0" min="0" oninput="calculateRowTotal()"></div>
+        <div class="field"><label>數量</label><input type="number" id="qty" value="1" min="1" oninput="calculateRowTotal()"></div>
+        <div class="field" style="grid-column: 1 / -1;"><label>備註</label><input type="text" id="note" placeholder="備註事項"></div>
 
-        <div class="field">
-            <label>冰塊</label>
-            <select id="ice">
-                <option>去冰</option>
-                <option>微冰</option>
-                <option>半冰</option>
-                <option>少冰</option>
-                <option>正常冰</option>
-            </select>
-        </div>
-
-        <div class="field">
-            <label>配料名稱</label>
-            <select id="toppings" onchange="toggleInput(this, 'customTopping')">
-                <option value="無">無</option>
-                <option value="CUSTOM">➕ 自行輸入...</option>
-            </select>
-            <input type="text" id="customTopping" class="custom-input" placeholder="加什麼料？">
-            <span class="btn-reset" id="reset_toppings" onclick="resetToSelect('toppings', 'customTopping')">↩ 返回選單</span>
-        </div>
-
-        <div class="field"><label>配料金額 ($)</label><input type="number" id="toppingPrice" value="0" oninput="calculateRowTotal()"></div>
-        <div class="field"><label>飲品單價</label><input type="number" id="price" value="0" oninput="calculateRowTotal()"></div>
-        <div class="field"><label>數量</label><input type="number" id="qty" value="1" oninput="calculateRowTotal()"></div>
-        
-        <div class="field" style="grid-column: span 5;"><label>備註</label><input type="text" id="note" placeholder="備註"></div>
-
-        <div class="price-auto-hint">💰 計算預覽：(<span id="hintPrice">0</span> + <span id="hintTPrice">0</span>) × <span id="hintQty">1</span> = <span id="rowTotal">0</span> 元</div>
-        <button class="btn-add" onclick="addOrder()">➕ 加入統計表</button>
+        <div class="price-auto-hint">💰 本筆小計：(<span id="hP">0</span> + <span id="hTP">0</span>) × <span id="hQ">1</span> = <span id="rowTotal">0</span> 元</div>
+        <button class="btn-add" id="btnAddOrder" onclick="addOrder()">➕ 加入統計清單</button>
     </div>
 
     <div id="captureArea" class="stats-area">
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th>姓名</th><th>飲品</th><th>規格</th><th>冷熱/糖冰</th><th>配料</th><th>配料費</th><th>單價</th><th>數量</th><th>總計</th><th>備註</th><th>操作</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td colspan="8" style="text-align: right;">應付總金額：</td>
-                    <td id="grandTotal" style="color:#d63031;">0</td>
-                    <td colspan="2">元</td>
-                </tr>
-            </tfoot>
-        </table>
+        <div id="statsHeaderInfo" class="stats-header-info">
+            <h2 style="color:var(--primary); margin-bottom: 10px;">🥤 飲品訂購清單</h2>
+            <p id="outContact">聯繫人：</p>
+            <p id="outTel">聯繫電話：</p>
+            <p id="outAddr">送餐地址：</p>
+        </div>
+
+        <h3 id="tableTitle">📊 訂單統計表</h3>
+        <div class="table-responsive">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th>姓名</th><th>飲品</th><th>規格</th><th>糖冰</th><th>配料</th><th>加料費</th><th>單價</th><th>數量</th><th>總計</th><th>備註</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="8" style="text-align: right;">應付總金額：</td>
+                        <td id="grandTotal" style="color:#d63031;">0</td>
+                        <td colspan="2">元</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     </div>
-    <div style="text-align: right;"><button onclick="saveImg()" style="margin-top:20px; padding:10px 20px; cursor:pointer; font-weight:bold;">📸 匯出統計圖</button></div>
+
+    <div style="text-align: right;">
+        <button class="btn-export" onclick="saveImg()">📸 匯出統計表</button>
+    </div>
 </div>
 
-<script type="module">
-    import { GoogleGenerativeAI } from "@google/generative-ai";
+<script>
+    let editingRow = null;
 
-    const API_KEY = "AIzaSyCjzaCMk71TbGkdo7WI-oYuWEvVA69Ks8A";
-    const MODEL_NAME = "models/gemini-2.5-flash"; 
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    let menuDatabase = {}; 
+    // --- 新增功能：圖片預覽 ---
+    function previewMenu(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const box = document.getElementById('previewBox');
+                const img = document.getElementById('menuPreview');
+                img.src = e.target.result;
+                box.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 
-    window.toggleInput = (selectEl, customInputId) => {
+    function closePreview() {
+        document.getElementById('previewBox').style.display = 'none';
+    }
+
+    // --- 新增功能：清空清單 ---
+    function clearAllOrders() {
+        const tbody = document.querySelector('#mainTable tbody');
+        if (tbody.rows.length === 0) {
+            alert("目前清單已經是空的喔！");
+            return;
+        }
+        if (confirm("確定要清空「所有」已加入的訂單資料嗎？")) {
+            tbody.innerHTML = "";
+            updateTotal();
+            editingRow = null;
+            document.getElementById('btnAddOrder').innerText = "➕ 加入統計清單";
+            document.getElementById('btnAddOrder').style.background = "var(--success)";
+        }
+    }
+
+    // --- 原有邏輯 ---
+    function toggleInput(selectEl, customInputId) {
         const inputEl = document.getElementById(customInputId);
         const resetBtn = document.getElementById('reset_' + selectEl.id);
         if (selectEl.value === "CUSTOM") {
@@ -156,117 +196,155 @@
             inputEl.style.display = "block";
             if(resetBtn) resetBtn.style.display = "block";
             inputEl.focus();
-        } else {
-            syncPrice();
         }
-    };
+    }
 
-    window.resetToSelect = (selectId, inputId) => {
+    function resetToSelect(selectId, inputId) {
         const sel = document.getElementById(selectId);
         const inp = document.getElementById(inputId);
         const btn = document.getElementById('reset_' + selectId);
-        sel.style.display = "block"; sel.value = "";
+        sel.style.display = "block"; sel.selectedIndex = 0;
         inp.style.display = "none"; btn.style.display = "none";
-    };
-
-    window.analyzeMenu = async () => {
-        const fileInput = document.getElementById('menuImg');
-        if (!fileInput.files[0]) return alert("請選取圖片");
-        document.getElementById('loader').style.display = 'block';
-
-        try {
-            const imageData = await fileToGenerativePart(fileInput.files[0]);
-            const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-            const prompt = `分析菜單 JSON：{ "drinks": ["名稱"], "toppings": ["料名"], "pricing": { "名稱": {"大": 50} } }`;
-            const result = await model.generateContent([prompt, imageData]);
-            const data = JSON.parse(result.response.text().replace(/```json|```/g, ""));
-            
-            menuDatabase = data.pricing;
-            updateDropdown('dName', data.drinks);
-            updateDropdown('toppings', data.toppings);
-            alert("✅ 解析完成！");
-        } catch (e) { alert("解析出錯：" + e.message); }
-        finally { document.getElementById('loader').style.display = 'none'; }
-    };
-
-    function updateDropdown(id, list) {
-        const sel = document.getElementById(id);
-        sel.innerHTML = list.map(i => `<option value="${i}">${i}</option>`).join('') + `<option value="CUSTOM">➕ 自行輸入...</option>`;
     }
 
-    window.syncPrice = () => {
-        const drink = document.getElementById('dName').value;
-        const sizeSel = document.getElementById('dSize');
-        if (menuDatabase[drink]) {
-            const sizes = Object.keys(menuDatabase[drink]);
-            sizeSel.innerHTML = sizes.map(s => `<option value="${s}">${s}</option>`).join('') + `<option value="CUSTOM">➕ 自行輸入...</option>`;
-            document.getElementById('price').value = menuDatabase[drink][sizeSel.value] || 0;
-        }
-        calculateRowTotal();
-    };
-
-    window.calculateRowTotal = () => {
+    function calculateRowTotal() {
         const p = parseInt(document.getElementById('price').value) || 0;
         const tp = parseInt(document.getElementById('toppingPrice').value) || 0;
         const q = parseInt(document.getElementById('qty').value) || 0;
-        document.getElementById('hintPrice').innerText = p;
-        document.getElementById('hintTPrice').innerText = tp;
-        document.getElementById('hintQty').innerText = q;
+        document.getElementById('hP').innerText = p;
+        document.getElementById('hTP').innerText = tp;
+        document.getElementById('hQ').innerText = q;
         document.getElementById('rowTotal').innerText = (p + tp) * q;
-    };
+    }
 
-    window.addOrder = () => {
-        const getVal = (sId, iId) => {
-            const s = document.getElementById(sId);
-            return s.style.display === "none" ? document.getElementById(iId).value : s.value;
-        };
-
-        const item = {
-            name: document.getElementById('uName').value || "同事",
-            drink: getVal('dName', 'customDName'),
-            size: getVal('dSize', 'customDSize'),
-            // 合併顯示 冷熱/糖/冰
+    function addOrder() {
+        const data = {
+            uName: document.getElementById('uName').value || "同事",
+            dName: document.getElementById('dName').value || "未命名",
+            size: document.getElementById('dSize').style.display === "none" ? document.getElementById('customDSize').value : document.getElementById('dSize').value,
             sugarIce: `${document.getElementById('dTemp').value}/${document.getElementById('sugar').value}/${document.getElementById('ice').value}`,
-            topping: getVal('toppings', 'customTopping'),
+            topping: document.getElementById('toppingName').value || "無",
             tPrice: parseInt(document.getElementById('toppingPrice').value) || 0,
             price: parseInt(document.getElementById('price').value) || 0,
-            qty: parseInt(document.getElementById('qty').value) || 0,
-            note: document.getElementById('note').value
+            qty: parseInt(document.getElementById('qty').value) || 1,
+            note: document.getElementById('note').value || "-",
         };
+        const total = (data.price + data.tPrice) * data.qty;
 
-        const total = (item.price + item.tPrice) * item.qty;
         const tbody = document.querySelector('#mainTable tbody');
-        tbody.innerHTML += `<tr>
-            <td>${item.name}</td><td>${item.drink}</td><td>${item.size}</td><td>${item.sugarIce}</td>
-            <td>${item.topping}</td><td>${item.tPrice}</td><td>${item.price}</td><td>${item.qty}</td>
-            <td><b>${total}</b></td><td>${item.note}</td>
-            <td><button onclick="this.parentElement.parentElement.remove(); updateTotal();">❌</button></td>
-        </tr>`;
-        updateTotal();
-        document.getElementById('uName').value = ""; 
-    };
 
-    window.updateTotal = () => {
+        if (editingRow) {
+            updateRow(editingRow, data, total);
+            editingRow = null;
+            document.getElementById('btnAddOrder').innerText = "➕ 加入統計清單";
+            document.getElementById('btnAddOrder').style.background = "var(--success)";
+        } else {
+            const row = tbody.insertRow();
+            renderRow(row, data, total);
+        }
+
+        updateTotal();
+        clearForm();
+    }
+
+    function renderRow(row, data, total) {
+        row.innerHTML = `
+            <td>${data.uName}</td><td>${data.dName}</td><td>${data.size}</td><td>${data.sugarIce}</td>
+            <td>${data.topping}</td><td>${data.tPrice}</td><td>${data.price}</td><td>${data.qty}</td>
+            <td><b>${total}</b></td><td>${data.note}</td>
+            <td>
+                <button class="btn-edit" onclick="editRow(this.parentElement.parentElement)">修改</button>
+                <button class="btn-del" onclick="this.parentElement.parentElement.remove(); updateTotal();">❌</button>
+            </td>
+        `;
+    }
+
+    function updateRow(row, data, total) {
+        renderRow(row, data, total);
+    }
+
+    function editRow(row) {
+        editingRow = row;
+        const cells = row.cells;
+        
+        document.getElementById('uName').value = cells[0].innerText;
+        document.getElementById('dName').value = cells[1].innerText;
+        
+        const sizeVal = cells[2].innerText;
+        const dSize = document.getElementById('dSize');
+        if([...dSize.options].some(opt => opt.value === sizeVal)) {
+            resetToSelect('dSize', 'customDSize');
+            dSize.value = sizeVal;
+        } else {
+            dSize.value = "CUSTOM";
+            toggleInput(dSize, 'customDSize');
+            document.getElementById('customDSize').value = sizeVal;
+        }
+
+        const sugarIce = cells[3].innerText.split('/');
+        document.getElementById('dTemp').value = sugarIce[0];
+        document.getElementById('sugar').value = sugarIce[1];
+        document.getElementById('ice').value = sugarIce[2];
+
+        document.getElementById('toppingName').value = cells[4].innerText;
+        document.getElementById('toppingPrice').value = cells[5].innerText;
+        document.getElementById('price').value = cells[6].innerText;
+        document.getElementById('qty').value = cells[7].innerText;
+        document.getElementById('note').value = cells[9].innerText;
+
+        calculateRowTotal();
+        document.getElementById('btnAddOrder').innerText = "💾 儲存修改";
+        document.getElementById('btnAddOrder').style.background = "var(--edit)";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function clearForm() {
+        document.getElementById('uName').value = "";
+        document.getElementById('dName').value = "";
+        document.getElementById('note').value = "";
+        document.getElementById('price').value = 0;
+        document.getElementById('toppingPrice').value = 0;
+        document.getElementById('toppingName').value = "";
+        calculateRowTotal();
+    }
+
+    function updateTotal() {
         let sum = 0;
         document.querySelectorAll('#mainTable tbody tr').forEach(tr => {
             sum += parseInt(tr.cells[8].innerText);
         });
         document.getElementById('grandTotal').innerText = sum;
-    };
-
-    async function fileToGenerativePart(file) {
-        const base64Promise = new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result.split(',')[1]); reader.readAsDataURL(file); });
-        return { inlineData: { data: await base64Promise, mimeType: file.type } };
     }
 
-    window.saveImg = () => {
-        html2canvas(document.querySelector("#captureArea")).then(canvas => {
+    function saveImg() {
+        if(document.querySelectorAll('#mainTable tbody tr').length === 0) {
+            alert("目前還沒有任何訂單喔！");
+            return;
+        }
+
+        document.getElementById('outContact').innerText = "聯繫人：" + (document.getElementById('contactName').value || "未填寫");
+        document.getElementById('outTel').innerText = "聯繫電話：" + (document.getElementById('contactTel').value || "未填寫");
+        document.getElementById('outAddr').innerText = "送餐地址：" + (document.getElementById('contactAddr').value || "未填寫");
+
+        const headerInfo = document.getElementById('statsHeaderInfo');
+        const title = document.getElementById('tableTitle');
+        const actionCols = document.querySelectorAll('th:last-child, td:last-child');
+        
+        headerInfo.style.display = "block";
+        title.style.display = "none";
+        actionCols.forEach(el => el.style.display = "none");
+
+        html2canvas(document.querySelector("#captureArea"), { scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = '辦公室點餐統計.png';
+            link.download = `訂單統計_${new Date().toLocaleDateString()}.png`;
             link.href = canvas.toDataURL();
             link.click();
+
+            headerInfo.style.display = "none";
+            title.style.display = "block";
+            actionCols.forEach(el => el.style.display = "");
         });
-    };
+    }
 </script>
 </body>
 </html>

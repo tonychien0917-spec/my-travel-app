@@ -3,104 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>飲品點購系統 - 行動優化版</title>
+    <title>飲品點購系統 - 專業版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --primary: #6c5ce7; --bg: #f4f7f6; --success: #00b894; --accent: #fdcb6e; --edit: #0984e3; --danger: #d63031; }
-        
-        /* 基礎設置，確保不超出邊界 */
         * { box-sizing: border-box; }
-        body { 
-            font-family: "Microsoft JhengHei", sans-serif; 
-            background-color: var(--bg); 
-            padding: 10px; 
-            margin: 0;
-            color: #2d3436; 
-            line-height: 1.5;
-            overflow-x: hidden; /* 防止整體網頁左右晃動 */
-        }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 10px; margin: 0; color: #2d3436; overflow-x: hidden; }
 
-        .container { 
-            max-width: 1000px; 
-            margin: auto; 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        }
-        
+        .container { max-width: 1000px; margin: auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
         .header h2 { color: var(--primary); margin: 5px 0; font-size: 1.4em; }
 
-        /* 聯繫資訊：修正手機超出問題 */
-        .contact-info { 
-            display: flex;
-            flex-direction: column; /* 手機優先：預設垂直排列 */
-            gap: 12px; 
-            margin-bottom: 20px; 
-            background: #fff9eb; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border: 1px solid var(--accent); 
-        }
+        /* 聯繫資訊 */
+        .contact-info { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #fff9eb; padding: 15px; border-radius: 8px; border: 1px solid var(--accent); }
 
-        /* 訂單表單：修正手機超出問題 */
-        .order-form { 
-            display: flex;
-            flex-direction: column; 
-            gap: 12px; 
-            background: #fff; 
-            padding: 15px; 
-            border: 1px solid #dfe6e9; 
-            border-radius: 10px; 
-        }
-
-        /* 當螢幕寬度大於 768px (電腦版) 時切換為併排 */
+        /* 訂單表單 */
+        .order-form { display: flex; flex-direction: column; gap: 12px; background: #fff; padding: 15px; border: 1px solid #dfe6e9; border-radius: 10px; }
+        
+        /* 電腦版併排邏輯 */
         @media (min-width: 768px) {
-            .contact-info {
-                display: grid;
-                grid-template-columns: 1fr 1fr 2fr; /* 電腦版維持併排 */
-            }
-            .order-form {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-            }
+            .contact-info { display: grid; grid-template-columns: 1fr 1fr 2fr; }
+            .order-form { display: grid; grid-template-columns: repeat(4, 1fr); }
             .btn-add { grid-column: span 4; }
+            .field-full { grid-column: span 4; }
         }
 
         .field { display: flex; flex-direction: column; width: 100%; }
         label { font-size: 0.85em; font-weight: bold; color: #636e72; margin-bottom: 4px; }
-        
-        /* 輸入框寬度優化 */
-        input, select { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid #dfe6e9; 
-            border-radius: 6px; 
-            font-size: 16px; /* 防止 iOS 輸入時自動縮放螢幕 */
-            outline: none; 
-        }
+        input, select { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 16px; outline: none; }
 
-        /* 統計表區域：增加捲軸保護 */
-        .stats-area { margin-top: 25px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #eee; overflow: hidden; }
+        /* 糖冰併排小區塊 */
+        .row-group { display: flex; gap: 8px; width: 100%; }
+        .row-group > .field { flex: 1; }
+
+        /* 統計表區域 */
+        .stats-area { margin-top: 25px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
         .stats-header-info { display: none; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
-        
-        /* 關鍵：讓表格在手機上可以橫向滑動而不影響頁面寬度 */
-        .table-responsive { 
-            width: 100%;
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-            border: 1px solid #eee;
-            border-radius: 5px;
-        }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid #eee; border-radius: 5px; }
 
-        table { width: 100%; border-collapse: collapse; min-width: 650px; } /* 設定最小寬度確保內容不擠壓 */
-        th { background: var(--primary); color: white; padding: 10px 5px; font-size: 13px; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        th { background: var(--primary); color: white; padding: 12px 5px; font-size: 13px; white-space: nowrap; }
         td { border: 1px solid #eee; padding: 10px 5px; text-align: center; font-size: 13px; }
         .total-row { background: #f8f9fa; font-weight: bold; }
         
-        /* 按鈕優化 */
-        .btn-add { background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-add { background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 5px; }
         .btn-export { background: var(--edit); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: bold; width: 100%; font-size: 16px; }
         .btn-clear-all { background: #fab1a0; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; float: right; }
     </style>
@@ -109,36 +55,56 @@
 
 <div class="container">
     <div class="header">
-        <h2>🥤 飲品訂購系統</h2>
-        <p>手機點餐統計工具</p>
+        <h2>🥤 飲品點購系統</h2>
+        <p>手機點餐統計工具 (糖冰分離版)</p>
     </div>
 
     <div class="contact-info">
-        <div class="field"><label>聯繫人</label><input type="text" id="contactName" placeholder="王小明"></div>
+        <div class="field"><label>聯繫人</label><input type="text" id="contactName" placeholder="主揪姓名"></div>
         <div class="field"><label>電話</label><input type="tel" id="contactTel" placeholder="09xx-xxx-xxx"></div>
-        <div class="field"><label>地址/備註</label><input type="text" id="contactAddr" placeholder="送餐地點"></div>
+        <div class="field"><label>送餐地址/時間</label><input type="text" id="contactAddr" placeholder="地點或備註"></div>
     </div>
 
     <div class="order-form">
-        <div class="field"><label>訂購人</label><input type="text" id="uName"></div>
-        <div class="field"><label>飲品名稱</label><input type="text" id="dName"></div>
-        <div class="field">
-            <label>規格/糖冰</label>
-            <div style="display: flex; gap: 5px;">
-                <select id="dSize" style="flex: 1;"><option>大杯</option><option>中杯</option></select>
-                <select id="sugarIce" style="flex: 2;">
-                    <option>無糖/去冰</option><option>微糖/微冰</option><option>半糖/少冰</option><option>全糖/正常</option>
+        <div class="field"><label>訂購人</label><input type="text" id="uName" placeholder="同事姓名"></div>
+        <div class="field"><label>飲品名稱</label><input type="text" id="dName" placeholder="珍珠奶茶等"></div>
+        
+        <div class="row-group">
+            <div class="field">
+                <label>規格</label>
+                <select id="dSize"><option>大杯</option><option>中杯</option><option>瓶裝</option></select>
+            </div>
+            <div class="field">
+                <label>糖度</label>
+                <select id="sugar">
+                    <option>無糖</option><option>微糖</option><option>半糖</option><option>少糖</option><option>正常</option>
                 </select>
             </div>
         </div>
-        <div class="field">
-            <label>單價/數量</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="number" id="price" value="0" style="flex: 1;">
-                <input type="number" id="qty" value="1" style="flex: 1;">
+
+        <div class="row-group">
+            <div class="field">
+                <label>冰塊</label>
+                <select id="ice">
+                    <option>去冰</option><option>微冰</option><option>半冰</option><option>少冰</option><option>正常</option><option>熱飲</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>單價</label>
+                <input type="number" id="price" value="0">
             </div>
         </div>
-        <div class="field" style="grid-column: 1 / -1;"><label>備註</label><input type="text" id="note" placeholder="加料等資訊"></div>
+
+        <div class="field field-full">
+            <label>數量</label>
+            <input type="number" id="qty" value="1">
+        </div>
+
+        <div class="field field-full">
+            <label>備註</label>
+            <input type="text" id="note" placeholder="例如：加珍珠、不加冰">
+        </div>
+        
         <button class="btn-add" id="btnAddOrder" onclick="addOrder()">➕ 加入統計清單</button>
     </div>
 
@@ -150,20 +116,20 @@
 
         <div style="margin-bottom: 10px;">
             <h3 style="display: inline-block; margin: 0; font-size: 1.1em;">📊 統計表</h3>
-            <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ 清空</button>
+            <button class="btn-clear-all" onclick="clearAllOrders()">🗑️ 清空資料</button>
         </div>
 
         <div class="table-responsive">
             <table id="mainTable">
                 <thead>
                     <tr>
-                        <th>姓名</th><th>飲品</th><th>規格</th><th>糖冰</th><th>單價</th><th>數量</th><th>小計</th><th class="no-export">操作</th>
+                        <th>姓名</th><th>飲品</th><th>規格</th><th>糖度</th><th>冰塊</th><th>單價</th><th>數量</th><th>小計</th><th class="no-export">操作</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
                 <tfoot>
                     <tr class="total-row">
-                        <td colspan="5" style="text-align: right;">總金額：</td>
+                        <td colspan="6" style="text-align: right;">總金額：</td>
                         <td id="totalQty">0</td>
                         <td id="grandTotal" style="color:var(--danger);">0</td>
                         <td class="no-export">元</td>
@@ -188,7 +154,8 @@
             uName: uName,
             dName: dName,
             size: document.getElementById('dSize').value,
-            sugarIce: document.getElementById('sugarIce').value,
+            sugar: document.getElementById('sugar').value,
+            ice: document.getElementById('ice').value,
             price: parseInt(document.getElementById('price').value) || 0,
             qty: parseInt(document.getElementById('qty').value) || 1,
             note: document.getElementById('note').value || "-"
@@ -201,6 +168,7 @@
             renderRow(editingRow, data, total);
             editingRow = null;
             document.getElementById('btnAddOrder').innerText = "➕ 加入統計清單";
+            document.getElementById('btnAddOrder').style.background = "var(--success)";
         } else {
             renderRow(tbody.insertRow(), data, total);
         }
@@ -209,11 +177,11 @@
 
     function renderRow(row, data, total) {
         row.innerHTML = `
-            <td>${data.uName}</td><td>${data.dName}</td><td>${data.size}</td><td>${data.sugarIce}</td>
+            <td>${data.uName}</td><td>${data.dName}</td><td>${data.size}</td><td>${data.sugar}</td><td>${data.ice}</td>
             <td>${data.price}</td><td>${data.qty}</td><td><b>${total}</b></td>
             <td class="no-export">
-                <span onclick="editRow(this.parentElement.parentElement)" style="color:blue;">改</span> | 
-                <span onclick="this.parentElement.parentElement.remove();updateTotal();" style="color:red;">❌</span>
+                <span onclick="editRow(this.parentElement.parentElement)" style="color:blue; cursor:pointer;">改</span> | 
+                <span onclick="this.parentElement.parentElement.remove();updateTotal();" style="color:red; cursor:pointer;">❌</span>
             </td>
         `;
     }
@@ -223,53 +191,63 @@
         const cells = row.cells;
         document.getElementById('uName').value = cells[0].innerText;
         document.getElementById('dName').value = cells[1].innerText;
-        document.getElementById('price').value = cells[4].innerText;
-        document.getElementById('qty').value = cells[5].innerText;
+        document.getElementById('dSize').value = cells[2].innerText;
+        document.getElementById('sugar').value = cells[3].innerText;
+        document.getElementById('ice').value = cells[4].innerText;
+        document.getElementById('price').value = cells[5].innerText;
+        document.getElementById('qty').value = cells[6].innerText;
         document.getElementById('btnAddOrder').innerText = "💾 儲存修改";
-        window.scrollTo({ top: 100, behavior: 'smooth' });
+        document.getElementById('btnAddOrder').style.background = "var(--edit)";
+        window.scrollTo({ top: 150, behavior: 'smooth' });
     }
 
     function clearForm() {
-        document.getElementById('uName').value = ""; document.getElementById('dName').value = "";
-        document.getElementById('price').value = 0; document.getElementById('qty').value = 1;
+        document.getElementById('uName').value = ""; 
+        document.getElementById('dName').value = "";
+        document.getElementById('price').value = 0; 
+        document.getElementById('qty').value = 1;
+        document.getElementById('note').value = "";
     }
 
     function updateTotal() {
         let totalMoney = 0; let totalQty = 0;
         const rows = document.querySelectorAll('#mainTable tbody tr');
         rows.forEach(tr => {
-            totalQty += parseInt(tr.cells[5].innerText);
-            totalMoney += parseInt(tr.cells[6].innerText);
+            totalQty += parseInt(tr.cells[6].innerText);
+            totalMoney += parseInt(tr.cells[7].innerText);
         });
         document.getElementById('totalQty').innerText = totalQty;
         document.getElementById('grandTotal').innerText = totalMoney;
     }
 
     function clearAllOrders() {
-        if(confirm("確定清空？")) { document.querySelector('#mainTable tbody').innerHTML = ""; updateTotal(); }
+        if(confirm("確定要清空整份清單嗎？")) { 
+            document.querySelector('#mainTable tbody').innerHTML = ""; 
+            updateTotal(); 
+        }
     }
 
     function saveImg() {
         const rows = document.querySelectorAll('#mainTable tbody tr');
-        if(rows.length === 0) return alert("無訂單！");
+        if(rows.length === 0) return alert("目前沒有資料可以匯出喔！");
 
         document.getElementById('outContact').innerText = "聯繫人：" + (document.getElementById('contactName').value || "-");
         document.getElementById('outTel').innerText = "電話：" + (document.getElementById('contactTel').value || "-");
-        document.getElementById('outAddr').innerText = "地址：" + (document.getElementById('contactAddr').value || "-");
+        document.getElementById('outAddr').innerText = "備註：" + (document.getElementById('contactAddr').value || "-");
         
         const info = document.getElementById('statsHeaderInfo');
-        const actionCols = document.querySelectorAll('.no-export');
+        const noExport = document.querySelectorAll('.no-export');
         
         info.style.display = "block";
-        actionCols.forEach(el => el.style.display = "none");
+        noExport.forEach(el => el.style.display = "none");
 
-        html2canvas(document.querySelector("#captureArea"), { scale: 2 }).then(canvas => {
+        html2canvas(document.querySelector("#captureArea"), { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `飲料清單.png`;
+            link.download = `飲料清單_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL();
             link.click();
             info.style.display = "none";
-            actionCols.forEach(el => el.style.display = "");
+            noExport.forEach(el => el.style.display = "");
         });
     }
 </script>

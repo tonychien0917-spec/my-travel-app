@@ -3,128 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智慧旅遊規劃師 2.5 Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: #f8fafc; }
-        .loading-animation {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff;
-            border-radius: 50%; animation: spin 0.8s linear infinite;
+    <title>AI 飲品點購系統 - 規範選項版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+      }
+    </script>
+    <style>
+        :root { --primary: #6c5ce7; --bg: #f4f7f6; --success: #00b894; --accent: #fdcb6e; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); padding: 20px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 25px; padding-bottom: 10px; }
+        .card { background: #f8f9ff; border: 2px dashed var(--primary); padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 25px; }
+        
+        .order-form { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; background: #fff; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .field { display: flex; flex-direction: column; }
+        label { font-size: 0.85em; font-weight: bold; color: #636e72; margin-bottom: 5px; }
+        input, select { padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; font-size: 14px; height: 42px; box-sizing: border-box; }
+        
+        .custom-input { display: none; margin-top: 5px; border: 2px solid var(--primary); background: #f0f0ff; }
+        .btn-reset { font-size: 11px; color: var(--primary); cursor: pointer; margin-top: 3px; display: none; text-align: right; }
+
+        .price-auto-hint { grid-column: span 5; background: var(--accent); padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.2em; margin: 10px 0; border: 1px solid #e1b12c; }
+        .btn-add { grid-column: span 5; background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+
+        .stats-area { margin-top: 40px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 950px; }
+        th { background: var(--primary); color: white; padding: 12px; font-size: 14px; }
+        td { border: 1px solid #eee; padding: 10px; text-align: center; font-size: 14px; }
+        .total-row { background: #dfe6e9; font-weight: bold; font-size: 1.1em; }
+        .loader { display: none; color: var(--primary); font-weight: bold; margin: 10px 0; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100">
-        <div class="bg-gradient-to-r from-indigo-600 to-blue-700 p-8 text-white text-center">
-            <h1 class="text-2xl font-black tracking-tight">智慧旅遊規劃師 2.5</h1>
-            <p class="text-blue-100 text-xs mt-1">天數、人數、預算，一鍵搞定</p>
-        </div>
-
-        <div class="p-7 space-y-4">
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">📍 目的地</label>
-                <input type="text" id="location" class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-lg focus:border-indigo-500 outline-none transition-all" placeholder="例如：台南、東京">
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">📅 天數</label>
-                <select id="days" class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-3 outline-none focus:border-indigo-500 text-gray-700 text-sm">
-                    <option value="1天">1天 (當日來回)</option>
-                    <option value="2天1夜" selected>2天1夜 (週末快閃)</option>
-                    <option value="3天2夜">3天2夜 (深度旅遊)</option>
-                    <option value="4天3夜">4天3夜 (悠閒漫遊)</option>
-                </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">👥 人數</label>
-                    <select id="people" class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-3 outline-none focus:border-indigo-500 text-gray-700 text-sm">
-                        <option value="1人獨旅">1人獨旅</option>
-                        <option value="2人世界">2人世界</option>
-                        <option value="3-4人好友">3-4人好友</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">💰 預算</label>
-                    <select id="budget" class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-3 outline-none focus:border-indigo-500 text-gray-700 text-sm">
-                        <option value="省錢窮遊">省錢窮遊</option>
-                        <option value="一般平價">一般平價</option>
-                        <option value="稍微奢侈">稍微奢侈</option>
-                    </select>
-                </div>
-            </div>
-
-            <button onclick="generateTrip()" id="mainBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all flex justify-center items-center gap-3">
-                <span id="loader" class="loading-animation hidden"></span>
-                <span id="btnText">開始規劃 ✨</span>
-            </button>
-
-            <div id="resultBox" class="hidden mt-4">
-                <div id="result" class="text-gray-700 text-sm bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100 overflow-y-auto max-h-[300px]"></div>
-                
-                <button onclick="shareToLine()" class="mt-4 w-full bg-[#06C755] hover:bg-[#05a346] text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 transition-all">
-                    <span>分享到 LINE 給旅伴</span>
-                </button>
-            </div>
-
-            <div id="errorBox" class="hidden mt-2 p-2 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100 font-mono break-all"></div>
-        </div>
+<div class="container">
+    <div class="header">
+        <h2>🥤 智慧飲品點購系統 (規範選項版)</h2>
+        <p>固定模型：models/gemini-2.5-flash</p>
     </div>
 
-    <script>
-        const _KEY = "AIzaSyCqy-mQvj-DucRkhDBoAUk86NuJWHtpzKg";
-        let currentTripPlan = ""; // 用來存儲純文字行程
+    <div class="card">
+        <input type="file" id="menuImg" accept="image/*">
+        <button onclick="analyzeMenu()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight: bold;">🚀 解析菜單價格</button>
+        <div id="loader" class="loader">🪄 正在解析菜單...</div>
+    </div>
 
-        async function generateTrip() {
-            const loc = document.getElementById('location').value.trim();
-            const days = document.getElementById('days').value;
-            const people = document.getElementById('people').value;
-            const budget = document.getElementById('budget').value;
-            const resultBox = document.getElementById('resultBox');
-            const resultDiv = document.getElementById('result');
-            const btn = document.getElementById('mainBtn');
-            const loader = document.getElementById('loader');
+    <div class="order-form">
+        <div class="field"><label>訂購人</label><input type="text" id="uName" placeholder="姓名"></div>
+        
+        <div class="field">
+            <label>飲品名稱</label>
+            <select id="dName" onchange="toggleInput(this, 'customDName')">
+                <option value="">請解析或輸入</option>
+                <option value="CUSTOM">➕ 自行輸入...</option>
+            </select>
+            <input type="text" id="customDName" class="custom-input" placeholder="手動輸入名稱">
+            <span class="btn-reset" id="reset_dName" onclick="resetToSelect('dName', 'customDName')">↩ 返回選單</span>
+        </div>
 
-            if (!loc) { alert("請輸入目的地！"); return; }
+        <div class="field">
+            <label>大小/規格</label>
+            <select id="dSize" onchange="toggleInput(this, 'customDSize')">
+                <option value="大杯">大杯</option>
+                <option value="中杯">中杯</option>
+                <option value="CUSTOM">➕ 自行輸入...</option>
+            </select>
+            <input type="text" id="customDSize" class="custom-input" placeholder="如：分享瓶">
+            <span class="btn-reset" id="reset_dSize" onclick="resetToSelect('dSize', 'customDSize')">↩ 返回選單</span>
+        </div>
 
-            resultBox.classList.add('hidden');
-            btn.disabled = true;
-            loader.classList.remove('hidden');
+        <div class="field"><label>冷/熱</label><select id="dTemp"><option>冰</option><option>熱</option></select></div>
+        
+        <div class="field">
+            <label>糖度</label>
+            <select id="sugar">
+                <option>無糖</option>
+                <option>微糖</option>
+                <option>半糖</option>
+                <option>少糖</option>
+                <option>全糖</option>
+            </select>
+        </div>
 
-            try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${_KEY}`;
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `請擔任專業導遊，規劃 ${loc} 的 ${days} 旅遊行程，人數 ${people}，預算 ${budget}。請用繁體中文回覆，包含每日行程與美食建議，並多用 Emoji。` }] }]
-                    })
-                });
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
+        <div class="field">
+            <label>冰塊</label>
+            <select id="ice">
+                <option>去冰</option>
+                <option>微冰</option>
+                <option>半冰</option>
+                <option>少冰</option>
+                <option>正常冰</option>
+            </select>
+        </div>
 
-                currentTripPlan = data.candidates[0].content.parts[0].text;
-                resultDiv.innerHTML = currentTripPlan.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-                resultBox.classList.remove('hidden');
-            } catch (err) {
-                alert("錯誤：" + err.message);
-            } finally {
-                btn.disabled = false;
-                loader.classList.add('hidden');
-            }
+        <div class="field">
+            <label>配料名稱</label>
+            <select id="toppings" onchange="toggleInput(this, 'customTopping')">
+                <option value="無">無</option>
+                <option value="CUSTOM">➕ 自行輸入...</option>
+            </select>
+            <input type="text" id="customTopping" class="custom-input" placeholder="加什麼料？">
+            <span class="btn-reset" id="reset_toppings" onclick="resetToSelect('toppings', 'customTopping')">↩ 返回選單</span>
+        </div>
+
+        <div class="field"><label>配料金額 ($)</label><input type="number" id="toppingPrice" value="0" oninput="calculateRowTotal()"></div>
+        <div class="field"><label>飲品單價</label><input type="number" id="price" value="0" oninput="calculateRowTotal()"></div>
+        <div class="field"><label>數量</label><input type="number" id="qty" value="1" oninput="calculateRowTotal()"></div>
+        
+        <div class="field" style="grid-column: span 5;"><label>備註</label><input type="text" id="note" placeholder="備註"></div>
+
+        <div class="price-auto-hint">💰 計算預覽：(<span id="hintPrice">0</span> + <span id="hintTPrice">0</span>) × <span id="hintQty">1</span> = <span id="rowTotal">0</span> 元</div>
+        <button class="btn-add" onclick="addOrder()">➕ 加入統計表</button>
+    </div>
+
+    <div id="captureArea" class="stats-area">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>姓名</th><th>飲品</th><th>規格</th><th>冷熱/糖冰</th><th>配料</th><th>配料費</th><th>單價</th><th>數量</th><th>總計</th><th>備註</th><th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="8" style="text-align: right;">應付總金額：</td>
+                    <td id="grandTotal" style="color:#d63031;">0</td>
+                    <td colspan="2">元</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div style="text-align: right;"><button onclick="saveImg()" style="margin-top:20px; padding:10px 20px; cursor:pointer; font-weight:bold;">📸 匯出統計圖</button></div>
+</div>
+
+<script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    const API_KEY = "AIzaSyCjzaCMk71TbGkdo7WI-oYuWEvVA69Ks8A";
+    const MODEL_NAME = "models/gemini-2.5-flash"; 
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    let menuDatabase = {}; 
+
+    window.toggleInput = (selectEl, customInputId) => {
+        const inputEl = document.getElementById(customInputId);
+        const resetBtn = document.getElementById('reset_' + selectEl.id);
+        if (selectEl.value === "CUSTOM") {
+            selectEl.style.display = "none";
+            inputEl.style.display = "block";
+            if(resetBtn) resetBtn.style.display = "block";
+            inputEl.focus();
+        } else {
+            syncPrice();
         }
+    };
 
-        // LINE 分享功能
-        function shareToLine() {
-            if (!currentTripPlan) return;
-            const message = encodeURIComponent(`🧳 嘿！這是我用 AI 規劃的行程：\n\n${currentTripPlan}`);
-            window.location.href = `https://line.me/R/share?text=${message}`;
+    window.resetToSelect = (selectId, inputId) => {
+        const sel = document.getElementById(selectId);
+        const inp = document.getElementById(inputId);
+        const btn = document.getElementById('reset_' + selectId);
+        sel.style.display = "block"; sel.value = "";
+        inp.style.display = "none"; btn.style.display = "none";
+    };
+
+    window.analyzeMenu = async () => {
+        const fileInput = document.getElementById('menuImg');
+        if (!fileInput.files[0]) return alert("請選取圖片");
+        document.getElementById('loader').style.display = 'block';
+
+        try {
+            const imageData = await fileToGenerativePart(fileInput.files[0]);
+            const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+            const prompt = `分析菜單 JSON：{ "drinks": ["名稱"], "toppings": ["料名"], "pricing": { "名稱": {"大": 50} } }`;
+            const result = await model.generateContent([prompt, imageData]);
+            const data = JSON.parse(result.response.text().replace(/```json|```/g, ""));
+            
+            menuDatabase = data.pricing;
+            updateDropdown('dName', data.drinks);
+            updateDropdown('toppings', data.toppings);
+            alert("✅ 解析完成！");
+        } catch (e) { alert("解析出錯：" + e.message); }
+        finally { document.getElementById('loader').style.display = 'none'; }
+    };
+
+    function updateDropdown(id, list) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = list.map(i => `<option value="${i}">${i}</option>`).join('') + `<option value="CUSTOM">➕ 自行輸入...</option>`;
+    }
+
+    window.syncPrice = () => {
+        const drink = document.getElementById('dName').value;
+        const sizeSel = document.getElementById('dSize');
+        if (menuDatabase[drink]) {
+            const sizes = Object.keys(menuDatabase[drink]);
+            sizeSel.innerHTML = sizes.map(s => `<option value="${s}">${s}</option>`).join('') + `<option value="CUSTOM">➕ 自行輸入...</option>`;
+            document.getElementById('price').value = menuDatabase[drink][sizeSel.value] || 0;
         }
-    </script>
+        calculateRowTotal();
+    };
+
+    window.calculateRowTotal = () => {
+        const p = parseInt(document.getElementById('price').value) || 0;
+        const tp = parseInt(document.getElementById('toppingPrice').value) || 0;
+        const q = parseInt(document.getElementById('qty').value) || 0;
+        document.getElementById('hintPrice').innerText = p;
+        document.getElementById('hintTPrice').innerText = tp;
+        document.getElementById('hintQty').innerText = q;
+        document.getElementById('rowTotal').innerText = (p + tp) * q;
+    };
+
+    window.addOrder = () => {
+        const getVal = (sId, iId) => {
+            const s = document.getElementById(sId);
+            return s.style.display === "none" ? document.getElementById(iId).value : s.value;
+        };
+
+        const item = {
+            name: document.getElementById('uName').value || "同事",
+            drink: getVal('dName', 'customDName'),
+            size: getVal('dSize', 'customDSize'),
+            // 合併顯示 冷熱/糖/冰
+            sugarIce: `${document.getElementById('dTemp').value}/${document.getElementById('sugar').value}/${document.getElementById('ice').value}`,
+            topping: getVal('toppings', 'customTopping'),
+            tPrice: parseInt(document.getElementById('toppingPrice').value) || 0,
+            price: parseInt(document.getElementById('price').value) || 0,
+            qty: parseInt(document.getElementById('qty').value) || 0,
+            note: document.getElementById('note').value
+        };
+
+        const total = (item.price + item.tPrice) * item.qty;
+        const tbody = document.querySelector('#mainTable tbody');
+        tbody.innerHTML += `<tr>
+            <td>${item.name}</td><td>${item.drink}</td><td>${item.size}</td><td>${item.sugarIce}</td>
+            <td>${item.topping}</td><td>${item.tPrice}</td><td>${item.price}</td><td>${item.qty}</td>
+            <td><b>${total}</b></td><td>${item.note}</td>
+            <td><button onclick="this.parentElement.parentElement.remove(); updateTotal();">❌</button></td>
+        </tr>`;
+        updateTotal();
+        document.getElementById('uName').value = ""; 
+    };
+
+    window.updateTotal = () => {
+        let sum = 0;
+        document.querySelectorAll('#mainTable tbody tr').forEach(tr => {
+            sum += parseInt(tr.cells[8].innerText);
+        });
+        document.getElementById('grandTotal').innerText = sum;
+    };
+
+    async function fileToGenerativePart(file) {
+        const base64Promise = new Promise(r => { const reader = new FileReader(); reader.onloadend = () => r(reader.result.split(',')[1]); reader.readAsDataURL(file); });
+        return { inlineData: { data: await base64Promise, mimeType: file.type } };
+    }
+
+    window.saveImg = () => {
+        html2canvas(document.querySelector("#captureArea")).then(canvas => {
+            const link = document.createElement('a');
+            link.download = '辦公室點餐統計.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    };
+</script>
 </body>
 </html>
